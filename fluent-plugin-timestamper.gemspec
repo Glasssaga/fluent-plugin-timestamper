@@ -7,8 +7,8 @@ Gem::Specification.new do |spec|
   spec.version       = "0.0.1"
   spec.authors       = ["Masaki Matsushita"]
   spec.email         = ["glass.saga@gmail.com"]
-  spec.summary       = %q{fluentd output plugin. it adds timestamp field in miliseconds, nanoseconds, or strftime format.}
-  spec.homepage      = ""
+  spec.summary       = %q{Fluentd output plugin which adds timestamp field to record in various formats.}
+  spec.homepage      = "https://github.com/Glasssaga/fluent-plugin-timestamper"
   spec.license       = "MIT"
 
   spec.files         = `git ls-files -z`.split("\x0")
