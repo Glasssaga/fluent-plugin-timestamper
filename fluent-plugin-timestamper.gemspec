@@ -7,9 +7,8 @@ Gem::Specification.new do |spec|
   spec.version       = "0.0.1"
   spec.authors       = ["Masaki Matsushita"]
   spec.email         = ["glass.saga@gmail.com"]
-  spec.summary       = %q{TODO: Write a short summary. Required.}
-  spec.description   = %q{TODO: Write a longer description. Optional.}
-  spec.homepage      = ""
+  spec.summary       = %q{Fluentd output plugin which adds timestamp field to record in various formats.}
+  spec.homepage      = "https://github.com/Glasssaga/fluent-plugin-timestamper"
   spec.license       = "MIT"
 
   spec.files         = `git ls-files -z`.split("\x0")
@@ -19,5 +18,6 @@ Gem::Specification.new do |spec|
 
   spec.add_development_dependency "bundler", "~> 1.7"
   spec.add_development_dependency "rake", "~> 10.0"
+  spec.add_development_dependency "timecop"
   spec.add_runtime_dependency "fluentd"
 end

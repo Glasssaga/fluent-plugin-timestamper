@@ -1,26 +1,24 @@
-# Fluent::Plugin::Timestamper
+# fluent-plugin-timestamper
 
-TODO: Write a gem description
+Fluentd output plugin which adds timestamp field to record.
+Timestamp format can be seconds and milliseconds from epoch, iso8601 and you can also use strftime() format.
 
 ## Installation
-
-Add this line to your application's Gemfile:
-
-```ruby
-gem 'fluent-plugin-timestamper'
-```
-
-And then execute:
-
-    $ bundle
-
-Or install it yourself as:
 
     $ gem install fluent-plugin-timestamper
 
 ## Usage
 
-TODO: Write usage instructions here
+Put your configuration in /etc/fluent/fluent.conf
+
+```xml:fluent.conf
+<match foo>
+  type timestamper
+  tag tag.to.rewrite
+  key name_of_key
+  format milliseconds # or "seconds", "iso8601", "%Y-%m-%d"
+</match>
+```
 
 ## Contributing
 
