@@ -1,57 +1,79 @@
 require 'helper'
+require 'timecop'
 
-class DataCounterOutputTest < Test::Unit::TestCase
+class TimestamperOutputTest < Test::Unit::TestCase
   def setup
+    @time = Time.parse("2011-01-02 13:14:15 UTC")
+    @tag = "foo"
+    @key = "timestamp"
+    Timecop.freeze(@time)
     Fluent::Test.setup
   end
 
-  CONFIG = %[
-    tag foo
-  ]
-  # CONFIG = %[
-  #   path #{TMP_DIR}/out_file_test
-  #   compress gz
-  #   utc
-  # ]
-
-  def create_driver(conf = CONFIG, tag='test')
+  def create_driver(conf, tag='test')
     Fluent::Test::OutputTestDriver.new(Fluent::Timestamper, tag).configure(conf)
   end
 
-  def test_configure
-    #### set configurations
-    # d = create_driver %[
-    #   path test_path
-    #   compress gz
-    # ]
-    #### check configurations
-    # assert_equal 'test_path', d.instance.path
-    # assert_equal :gz, d.instance.compress
+  def test_format_seconds
+    d = create_driver %[
+      tag #{@tag}
+      key #{@key}
+      format seconds
+    ]
+
+    seconds = @time.to_i
+    timestamp = pick_timestamp(d)
+    assert_equal seconds, timestamp
   end
 
-  def test_format
-    d = create_driver
+  def test_format_milliseconds
+    d = create_driver %[
+      tag #{@tag}
+      key #{@key}
+      format milliseconds
+    ]
 
-    # time = Time.parse("2011-01-02 13:14:15 UTC").to_i
-    # d.emit({"a"=>1}, time)
-    # d.emit({"a"=>2}, time)
-
-    # d.expect_format %[2011-01-02T13:14:15Z\ttest\t{"a":1}\n]
-    # d.expect_format %[2011-01-02T13:14:15Z\ttest\t{"a":2}\n]
-
-    # d.run
+    milliseconds = (@time.to_i * 1000) + (@time.usec / 1000.0).round
+    timestamp = pick_timestamp(d)
+    assert_equal milliseconds, timestamp
   end
 
-  def test_write
-    d = create_driver
+  def test_format_iso8601
+    d = create_driver %[
+      tag #{@tag}
+      key #{@key}
+      format iso8601
+    ]
 
-    # time = Time.parse("2011-01-02 13:14:15 UTC").to_i
-    # d.emit({"a"=>1}, time)
-    # d.emit({"a"=>2}, time)
+    iso8601 = Time.now.iso8601
+    timestamp = pick_timestamp(d)
+    assert_equal iso8601, timestamp
+  end
 
-    # ### FileOutput#write returns path
-    # path = d.run
-    # expect_path = "#{TMP_DIR}/out_file_test._0.log.gz"
-    # assert_equal expect_path, path
+  def test_format_strftime
+    d = create_driver %[
+      tag #{@tag}
+      key #{@key}
+      format %X
+    ]
+
+    formatted = Time.now.strftime("%X")
+    timestamp = pick_timestamp(d)
+    assert_equal formatted, timestamp
+  end
+
+  private
+
+  def pick_timestamp(d)
+    d.run do
+      d.emit({"a"=>1}, @time.to_i)
+    end
+
+    record = d.emits.first.last
+    return record[@key]
+  end
+
+  def teardown
+    Timecop.return
   end
 end
