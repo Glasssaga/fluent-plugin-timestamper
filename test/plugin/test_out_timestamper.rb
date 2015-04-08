@@ -14,6 +14,24 @@ class TimestamperOutputTest < Test::Unit::TestCase
     Fluent::Test::OutputTestDriver.new(Fluent::Timestamper, tag).configure(conf)
   end
 
+  def test_bad_source
+    assert_raise do create_driver %[
+      tag #{@tag}
+      key #{@key}
+      format seconds
+      source badsource
+    ] end
+  end
+
+  def test_bad_standard
+    assert_raise do create_driver %[
+      tag #{@tag}
+      key #{@key}
+      format seconds
+      standard badstandard
+    ] end
+  end
+
   def test_format_seconds
     d = create_driver %[
       tag #{@tag}
@@ -60,6 +78,24 @@ class TimestamperOutputTest < Test::Unit::TestCase
     formatted = Time.now.strftime("%X")
     timestamp = pick_timestamp(d)
     assert_equal formatted, timestamp
+  end
+
+  # Doesn't use fake frozen time, since we want to test record time
+  def test_format_strftime_record
+    d = create_driver %[
+      tag #{@tag}
+      key #{@key}
+      format %d/%b/%Y:%H:%M:%S %z
+      source record
+      standard localtime
+    ]
+
+    d.run do
+      d.emit({"a"=>1}, Time.parse("1990-04-14 09:45:15 UTC").to_i)
+    end
+
+    record = d.emits.first.last
+    assert_equal "14/Apr/1990:11:45:15 +0200", record[@key]
   end
 
   private
