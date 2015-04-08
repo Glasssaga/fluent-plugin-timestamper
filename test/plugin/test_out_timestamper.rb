@@ -23,6 +23,15 @@ class TimestamperOutputTest < Test::Unit::TestCase
     ] end
   end
 
+  def test_bad_standard
+    assert_raise do create_driver %[
+      tag #{@tag}
+      key #{@key}
+      format seconds
+      standard badstandard
+    ] end
+  end
+
   def test_format_seconds
     d = create_driver %[
       tag #{@tag}
@@ -76,16 +85,17 @@ class TimestamperOutputTest < Test::Unit::TestCase
     d = create_driver %[
       tag #{@tag}
       key #{@key}
-      format %X
+      format %d/%b/%Y:%H:%M:%S %z
       source record
+      standard localtime
     ]
 
     d.run do
-      d.emit({"a"=>1}, Time.parse("1990-04-14 11:45:15 UTC").to_i)
+      d.emit({"a"=>1}, Time.parse("1990-04-14 09:45:15 UTC").to_i)
     end
 
     record = d.emits.first.last
-    assert_equal Time.parse("1990-04-14 11:45:15 UTC").strftime("%X"), record[@key]
+    assert_equal "14/Apr/1990:11:45:15 +0200", record[@key]
   end
 
   private
